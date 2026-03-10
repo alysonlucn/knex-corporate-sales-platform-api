@@ -2,8 +2,9 @@ import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { AppDataSource } from './shared/infra/typeorm';
+import { AppDataSource, runSeeds } from './shared/infra/typeorm';
 import authRoutes from './modules/auth/routes/auth.routes';
+import companiesRoutes from './modules/companies/routes/companies.routes';
 import { errorHandler } from './shared/middlewares/errorHandler';
 
 const app = express();
@@ -13,7 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 AppDataSource.initialize()
-  .then(() => {
+  .then(async () => {
+    await runSeeds();
+
     const PORT = process.env.PORT || 3333;
     app.listen(PORT, () => {
       // eslint-disable-next-line no-console
@@ -26,5 +29,6 @@ AppDataSource.initialize()
   });
 
 app.use('/auth', authRoutes);
+app.use('/companies', companiesRoutes);
 
 app.use(errorHandler);
