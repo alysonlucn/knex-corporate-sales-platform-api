@@ -11,6 +11,7 @@ import { Company } from '@modules/companies/infra/typeorm/entities/Company';
 import { Transaction } from '@modules/transactions/infra/typeorm/entities/Transaction';
 
 export enum UserRole {
+  ADMIN = 'admin',
   CONSUMER = 'consumer',
   COLLABORATOR = 'collaborator',
 }
