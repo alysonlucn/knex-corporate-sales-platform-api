@@ -6,6 +6,8 @@ import { AppDataSource, runSeeds } from './shared/infra/typeorm';
 import authRoutes from './modules/auth/routes/auth.routes';
 import companiesRoutes from './modules/companies/routes/companies.routes';
 import productRoutes from './modules/products/routes/product.routes';
+import transactionsRoutes from './modules/transactions/routes/transactions.routes';
+import usersRoutes from './modules/users/routes/users.routes';
 import { errorHandler } from './shared/middlewares/errorHandler';
 
 const app = express();
@@ -32,5 +34,7 @@ AppDataSource.initialize()
 app.use('/auth', authRoutes);
 app.use('/companies', companiesRoutes);
 app.use('/products', productRoutes);
+app.use('/transactions', transactionsRoutes);
+app.use('/users', usersRoutes);
 
 app.use(errorHandler);
