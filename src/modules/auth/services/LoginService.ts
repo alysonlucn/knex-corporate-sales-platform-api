@@ -30,8 +30,8 @@ export class LoginService {
         'role',
         'createdAt',
         'updatedAt',
-        'company',
       ],
+      relations: ['company'],
     });
 
     if (!user) {
