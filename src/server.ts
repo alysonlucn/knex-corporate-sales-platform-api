@@ -2,7 +2,9 @@ import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
 import { AppDataSource, runSeeds } from './shared/infra/typeorm';
+import { swaggerSpec } from './shared/infra/swagger/swagger';
 import authRoutes from './modules/auth/routes/auth.routes';
 import companiesRoutes from './modules/companies/routes/companies.routes';
 import productRoutes from './modules/products/routes/product.routes';
@@ -17,6 +19,15 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Corporate Sales Platform - API Docs',
+  }),
+);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -25,7 +36,7 @@ AppDataSource.initialize()
   .then(async () => {
     await runSeeds();
 
-    const PORT = process.env.PORT || 3333;
+    const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
       Logger.info(`Server is running on http://localhost:${PORT}`);
     });
