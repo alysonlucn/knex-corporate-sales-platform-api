@@ -5,6 +5,7 @@ import {
 } from '../../../../modules/users/infra/typeorm/entities/User';
 import { Company } from '../../../../modules/companies/infra/typeorm/entities/Company';
 import bcrypt from 'bcryptjs';
+import { Logger } from '../../../helpers/logger';
 
 export const seedUsers = async () => {
   const userRepository = AppDataSource.getRepository(User);
@@ -25,8 +26,7 @@ export const seedUsers = async () => {
       role: UserRole.ADMIN,
     });
     await userRepository.save(admin);
-    // eslint-disable-next-line no-console
-    console.log('✅ Admin user created');
+    Logger.info('✅ Admin user created');
   }
 
   // Apple Collaborator
@@ -42,8 +42,7 @@ export const seedUsers = async () => {
       company: apple,
     });
     await userRepository.save(appleCollab);
-    // eslint-disable-next-line no-console
-    console.log('✅ Apple collaborator created');
+    Logger.info('✅ Apple collaborator created');
   }
 
   // Samsung Collaborator
@@ -59,8 +58,7 @@ export const seedUsers = async () => {
       company: samsung,
     });
     await userRepository.save(samsungCollab);
-    // eslint-disable-next-line no-console
-    console.log('✅ Samsung collaborator created');
+    Logger.info('✅ Samsung collaborator created');
   }
 
   // Consumer User
@@ -75,7 +73,6 @@ export const seedUsers = async () => {
       role: UserRole.CONSUMER,
     });
     await userRepository.save(consumer);
-    // eslint-disable-next-line no-console
-    console.log('✅ Consumer user created');
+    Logger.info('✅ Consumer user created');
   }
 };

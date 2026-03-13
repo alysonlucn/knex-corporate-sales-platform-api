@@ -2,9 +2,10 @@ import { Response } from 'express';
 import { UserService } from '../services/UserService';
 import { AuthRequest } from '../../auth/middlewares/AuthMiddleware';
 import { AppError } from '../../../shared/errors/AppError';
+import { ResponseHelper } from '../../../shared/helpers/response';
 
 export class UserController {
-  private userService = new UserService();
+  constructor(private readonly userService: UserService) {}
 
   async getProfile(req: AuthRequest, res: Response) {
     const userId = req.user?.id;
@@ -15,7 +16,7 @@ export class UserController {
 
     const user = await this.userService.findById(Number(userId));
 
-    return res.status(200).json(user);
+    return ResponseHelper.success(res, user);
   }
 
   async listAll(req: AuthRequest, res: Response) {
@@ -26,6 +27,6 @@ export class UserController {
       (Number(page) - 1) * Number(limit),
     );
 
-    return res.status(200).json(result);
+    return ResponseHelper.success(res, result);
   }
 }

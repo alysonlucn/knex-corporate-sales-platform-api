@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { CompanyService } from '../services/CompanyService';
+import { ResponseHelper } from '../../../shared/helpers/response';
 
 export class CompanyController {
-  private companyService = new CompanyService();
+  constructor(private readonly companyService: CompanyService) {}
 
   async create(req: Request, res: Response) {
     const { name, cnpj, description } = req.body;
@@ -13,13 +14,13 @@ export class CompanyController {
       description,
     });
 
-    return res.status(201).json(company);
+    return ResponseHelper.success(res, company, 201);
   }
 
   async findAll(req: Request, res: Response) {
     const companies = await this.companyService.findAll();
 
-    return res.status(200).json(companies);
+    return ResponseHelper.success(res, companies);
   }
 
   async findById(req: Request, res: Response) {
@@ -27,7 +28,7 @@ export class CompanyController {
 
     const company = await this.companyService.findById(Number(id));
 
-    return res.status(200).json(company);
+    return ResponseHelper.success(res, company);
   }
 
   async update(req: Request, res: Response) {
@@ -40,7 +41,7 @@ export class CompanyController {
       description,
     });
 
-    return res.status(200).json(company);
+    return ResponseHelper.success(res, company);
   }
 
   async delete(req: Request, res: Response) {

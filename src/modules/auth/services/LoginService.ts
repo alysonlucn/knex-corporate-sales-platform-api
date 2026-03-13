@@ -1,4 +1,4 @@
-import { AppDataSource } from '../../../shared/infra/typeorm';
+import { IUserRepository } from '../../users/repositories/IUserRepository';
 import { User } from '../../users/infra/typeorm/entities/User';
 import { AppError } from '../../../shared/errors/AppError';
 import bcrypt from 'bcryptjs';
@@ -17,22 +17,10 @@ interface LoginResponse {
 }
 
 export class LoginService {
-  async execute(data: LoginDTO): Promise<LoginResponse> {
-    const userRepository = AppDataSource.getRepository(User);
+  constructor(private readonly userRepository: IUserRepository) {}
 
-    const user = await userRepository.findOne({
-      where: { email: data.email },
-      select: [
-        'id',
-        'name',
-        'email',
-        'password',
-        'role',
-        'createdAt',
-        'updatedAt',
-      ],
-      relations: ['company'],
-    });
+  async execute(data: LoginDTO): Promise<LoginResponse> {
+    const user = await this.userRepository.findByEmailWithPassword(data.email);
 
     if (!user) {
       throw new AppError(401, 'Invalid email or password');

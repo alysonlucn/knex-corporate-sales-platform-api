@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 import { seedCompanies } from './seeds/seedCompanies';
 import { seedUsers } from './seeds/seedUsers';
+import { Logger } from '../../helpers/logger';
 
 dotenv.config();
 
@@ -25,15 +26,12 @@ export const runSeeds = async () => {
   }
 
   try {
-    // eslint-disable-next-line no-console
-    console.log('Running seeds');
+    Logger.info('Running seeds');
     await seedCompanies();
     await seedUsers();
-    // eslint-disable-next-line no-console
-    console.log('Seeds completed!');
+    Logger.info('Seeds completed!');
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error running seeds:', error);
+    Logger.error('Error running seeds:', error);
     throw error;
   }
 };

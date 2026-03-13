@@ -9,6 +9,7 @@ import productRoutes from './modules/products/routes/product.routes';
 import transactionsRoutes from './modules/transactions/routes/transactions.routes';
 import usersRoutes from './modules/users/routes/users.routes';
 import { errorHandler } from './shared/middlewares/errorHandler';
+import { Logger } from './shared/helpers/logger';
 
 const app = express();
 
@@ -26,13 +27,11 @@ AppDataSource.initialize()
 
     const PORT = process.env.PORT || 3333;
     app.listen(PORT, () => {
-      // eslint-disable-next-line no-console
-      console.log(`Server is running on http://localhost:${PORT}`);
+      Logger.info(`Server is running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error('Error in initialization', err);
+    Logger.error('Error in initialization', err);
   });
 
 app.use('/auth', authRoutes);

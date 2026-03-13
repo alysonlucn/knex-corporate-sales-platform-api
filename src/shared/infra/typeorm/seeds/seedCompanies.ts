@@ -1,5 +1,6 @@
 import { AppDataSource } from '../index';
 import { Company } from '../../../../modules/companies/infra/typeorm/entities/Company';
+import { Logger } from '../../../helpers/logger';
 
 export const seedCompanies = async () => {
   const companyRepository = AppDataSource.getRepository(Company);
@@ -40,11 +41,9 @@ export const seedCompanies = async () => {
     if (!exists) {
       const company = companyRepository.create(companyData);
       await companyRepository.save(company);
-      // eslint-disable-next-line no-console
-      console.log(`Company created: ${company.name}`);
+      Logger.info(`Company created: ${company.name}`);
     } else {
-      // eslint-disable-next-line no-console
-      console.log(`Company already exists: ${companyData.name}`);
+      Logger.info(`Company already exists: ${companyData.name}`);
     }
   }
 };

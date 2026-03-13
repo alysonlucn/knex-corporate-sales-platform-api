@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { CompanyController } from '../controllers/CompanyController';
+import { CompanyService } from '../services/CompanyService';
+import { CompanyRepository } from '../infra/typeorm/repositories/CompanyRepository';
 import { validate } from '../../../shared/middlewares/validate';
 import {
   createCompanySchema,
@@ -8,7 +10,10 @@ import {
 import { ensureAuthenticated } from '../../auth/middlewares/AuthMiddleware';
 
 const companiesRoutes = Router();
-const companyController = new CompanyController();
+
+const companyRepository = new CompanyRepository();
+const companyService = new CompanyService(companyRepository);
+const companyController = new CompanyController(companyService);
 
 companiesRoutes.post(
   '/',

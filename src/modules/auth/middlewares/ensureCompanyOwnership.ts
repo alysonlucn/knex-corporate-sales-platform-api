@@ -25,7 +25,7 @@ export const ensureCompanyOwnership = (entityType: any, paramKey: string) => {
       throw new AppError(404, `${entityType.name} not found`);
     }
 
-    if (entity.company.id !== req.user.companyId) {
+    if (String(entity.company.id) !== req.user.companyId) {
       throw new AppError(
         403,
         'You do not have permission to access this resource',

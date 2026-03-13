@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../errors/AppError';
 import { ResponseHelper } from '../helpers/response';
+import { Logger } from '../helpers/logger';
 
 export const errorHandler = (
   err: Error,
@@ -12,7 +13,6 @@ export const errorHandler = (
     return ResponseHelper.error(res, err.statusCode, err.message);
   }
 
-  // eslint-disable-next-line no-console
-  console.error('Unexpected error:', err);
+  Logger.error('Unexpected error:', err);
   return ResponseHelper.error(res, 500, 'Internal server error');
 };

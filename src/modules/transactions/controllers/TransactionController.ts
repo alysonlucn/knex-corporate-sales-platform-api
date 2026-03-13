@@ -2,9 +2,10 @@ import { Response } from 'express';
 import { TransactionService } from '../services/TransactionService';
 import { AuthRequest } from '../../auth/middlewares/AuthMiddleware';
 import { AppError } from '../../../shared/errors/AppError';
+import { ResponseHelper } from '../../../shared/helpers/response';
 
 export class TransactionController {
-  private transactionService = new TransactionService();
+  constructor(private readonly transactionService: TransactionService) {}
 
   async purchase(req: AuthRequest, res: Response) {
     const { productId, quantity } = req.body;
@@ -20,7 +21,7 @@ export class TransactionController {
       quantity: Number(quantity),
     });
 
-    return res.status(201).json(transaction);
+    return ResponseHelper.success(res, transaction, 201);
   }
 
   async findByUser(req: AuthRequest, res: Response) {
@@ -36,7 +37,7 @@ export class TransactionController {
       limit: Number(limit),
     });
 
-    return res.status(200).json(result);
+    return ResponseHelper.success(res, result);
   }
 
   async findAll(req: AuthRequest, res: Response) {
@@ -47,6 +48,6 @@ export class TransactionController {
       limit: Number(limit),
     });
 
-    return res.status(200).json(result);
+    return ResponseHelper.success(res, result);
   }
 }

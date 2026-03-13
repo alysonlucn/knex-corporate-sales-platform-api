@@ -1,16 +1,12 @@
-import { AppDataSource } from '../../../shared/infra/typeorm';
-import { User } from '../infra/typeorm/entities/User';
+import { IUserRepository } from '../repositories/IUserRepository';
 import { AppError } from '../../../shared/errors/AppError';
 import { UserResponseDTO } from '../dtos/UserResponseDTO';
 
 export class UserService {
-  private repository = AppDataSource.getRepository(User);
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async findById(id: number): Promise<UserResponseDTO> {
-    const user = await this.repository.findOne({
-      where: { id },
-      relations: ['company'],
-    });
+    const user = await this.userRepository.findByIdWithCompany(id);
 
     if (!user) {
       throw new AppError(404, 'User not found');
@@ -27,11 +23,10 @@ export class UserService {
   }
 
   async findAll(limit = 10, offset = 0) {
-    const [users, total] = await this.repository.findAndCount({
-      skip: offset,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    const [users, total] = await this.userRepository.findAllPaginated(
+      limit,
+      offset,
+    );
 
     return {
       data: users.map((user) => ({

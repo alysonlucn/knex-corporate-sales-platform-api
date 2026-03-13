@@ -1,9 +1,11 @@
 import { Response } from 'express';
 import { ProductService } from '../services/ProductService';
 import { AuthRequest } from '../../auth/middlewares/AuthMiddleware';
+import { ResponseHelper } from '../../../shared/helpers/response';
+import { AppError } from '../../../shared/errors/AppError';
 
 export class ProductController {
-  private productService = new ProductService();
+  constructor(private readonly productService: ProductService) {}
 
   async create(req: AuthRequest, res: Response) {
     const { name, price, stock } = req.body;
@@ -11,7 +13,7 @@ export class ProductController {
     const companyId = req.user?.companyId;
 
     if (!userId || !companyId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      throw new AppError(401, 'Unauthorized');
     }
 
     const product = await this.productService.create(
@@ -24,7 +26,7 @@ export class ProductController {
       userId,
     );
 
-    return res.status(201).json(product);
+    return ResponseHelper.success(res, product, 201);
   }
 
   async findAll(req: AuthRequest, res: Response) {
@@ -32,7 +34,7 @@ export class ProductController {
     const companyId = req.user?.companyId;
 
     if (!companyId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      throw new AppError(401, 'Unauthorized');
     }
 
     const result = await this.productService.findAll({
@@ -42,7 +44,7 @@ export class ProductController {
       limit: Number(limit),
     });
 
-    return res.status(200).json(result);
+    return ResponseHelper.success(res, result);
   }
 
   async findById(req: AuthRequest, res: Response) {
@@ -50,7 +52,7 @@ export class ProductController {
 
     const product = await this.productService.findById(Number(id));
 
-    return res.status(200).json(product);
+    return ResponseHelper.success(res, product);
   }
 
   async update(req: AuthRequest, res: Response) {
@@ -59,7 +61,7 @@ export class ProductController {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      throw new AppError(401, 'Unauthorized');
     }
 
     const product = await this.productService.update(
@@ -68,7 +70,7 @@ export class ProductController {
       userId,
     );
 
-    return res.status(200).json(product);
+    return ResponseHelper.success(res, product);
   }
 
   async delete(req: AuthRequest, res: Response) {
@@ -76,7 +78,7 @@ export class ProductController {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      throw new AppError(401, 'Unauthorized');
     }
 
     await this.productService.delete(Number(id), userId);
