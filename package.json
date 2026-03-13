@@ -12,10 +12,17 @@
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate -d src/shared/infra/typeorm/index.ts",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:rebuild": "docker-compose up -d --build",
+    "docker:logs": "docker-compose logs -f api",
+    "docker:migrate": "docker-compose exec api npm run migration:run",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },
   "dependencies": {
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -24,6 +31,8 @@
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.28",
     "yup": "^1.7.1"
   },
