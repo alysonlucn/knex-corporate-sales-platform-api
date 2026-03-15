@@ -34,6 +34,10 @@ app.get('/health', (req, res) => {
 
 AppDataSource.initialize()
   .then(async () => {
+    Logger.info('Running migrations...');
+    await AppDataSource.runMigrations();
+    Logger.info('Migrations completed!');
+
     await runSeeds();
 
     const PORT = process.env.PORT || 3000;

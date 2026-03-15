@@ -28,15 +28,17 @@ A plataforma permite que empresas gerenciem seus produtos, colaboradores realize
 
 Antes de começar, certifique-se de que você tem as seguintes ferramentas instaladas na sua máquina:
 
-| Ferramenta       | Versão mínima     | Como verificar            | Como instalar                              |
-|-----------------|-------------------|---------------------------|--------------------------------------------|
-| **Node.js**     | 20.x              | `node --version`          | [nodejs.org](https://nodejs.org/)          |
-| **npm**         | 9.x               | `npm --version`           | Vem junto com o Node.js                    |
-| **PostgreSQL**  | 16.x              | `psql --version`          | [postgresql.org](https://www.postgresql.org/download/) |
-| **Docker**      | 24.x *(opcional)*  | `docker --version`        | [docker.com](https://docs.docker.com/get-docker/)    |
-| **Docker Compose** | 2.x *(opcional)* | `docker compose version` | Vem junto com o Docker Desktop             |
+| Ferramenta         | Versão mínima | Como verificar            | Necessário para         | Como instalar                              |
+|-------------------|:-------------:|---------------------------|--------------------------|--------------------------------------------||
+| **Node.js**       | 20.x          | `node --version`          | Ambos                   | [nodejs.org](https://nodejs.org/)          |
+| **npm**           | 9.x           | `npm --version`           | Ambos                   | Vem junto com o Node.js                    |
+| **Docker Engine** | 24.x          | `docker --version`        | 🐳 Docker (recomendado) | [docs.docker.com](https://docs.docker.com/engine/install/) |
+| **Docker Compose** | 2.x          | `docker compose version`  | 🐳 Docker (recomendado) | Incluído no Docker Engine                  |
+| **PostgreSQL**    | 16.x          | `psql --version`          | 💻 Local (sem Docker)   | [postgresql.org](https://www.postgresql.org/download/) |
 
-> **Dica:** Se você usar Docker, **não precisa** ter o PostgreSQL instalado na máquina — o container já inclui o banco.
+> **Importante:** Você precisa do **Docker Engine** completo (com o daemon `dockerd`), não apenas o CLI. Verifique com: `docker ps`. Se der erro de conexão, o daemon não está rodando.
+>
+> Se usar Docker, **não precisa** ter o PostgreSQL instalado — o container já inclui o banco.
 
 ---
 
@@ -45,7 +47,7 @@ Antes de começar, certifique-se de que você tem as seguintes ferramentas insta
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/knex-corporate-sales-platform-api.git
+git clone https://github.com/alysonlucn/knex-corporate-sales-platform-api.git
 cd knex-corporate-sales-platform-api
 ```
 
@@ -110,27 +112,21 @@ JWT_EXPIRATION=24h                         # Tempo de expiração do token (ex: 
 
 ## Rodando com Docker (Recomendado)
 
-A forma mais simples de rodar o projeto. O Docker sobe automaticamente o **PostgreSQL** e a **API** em containers isolados.
+A forma mais simples de rodar o projeto. O Docker sobe automaticamente o **PostgreSQL** e a **API** em containers isolados. As **migrations** e **seeds** são executados automaticamente na inicialização — não precisa rodar nada manualmente.
 
 ### Passo a passo
 
 ```bash
-# 1. Certifique-se de ter o .env configurado (DB_HOST será ignorado, o Docker usa "db" internamente)
+# 1. Configure as variáveis de ambiente
 cp .env.example .env
 
 # 2. Suba toda a stack (PostgreSQL + API)
 npm run docker:up
-
-# 3. Caso precise rebuildar (após mudanças no código)
-npm run docker:rebuild
-
-# 4. Acompanhe os logs em tempo real
-npm run docker:logs
 ```
 
-### Verificar se está funcionando
+Isso é tudo! Aguarde alguns segundos para o banco ficar healthy e a API subir.
 
-Após os containers subirem, teste o health check:
+### Verificar se está funcionando
 
 ```bash
 curl http://localhost:3000/health
@@ -141,6 +137,16 @@ Resposta esperada:
 ```json
 { "status": "ok", "timestamp": "2026-03-13T10:00:00.000Z" }
 ```
+
+> 📝 A API também expõe documentação interativa em **http://localhost:3000/api-docs**
+
+### O que acontece automaticamente ao subir
+
+1. 🐘 **PostgreSQL** sobe e cria o banco `corporate_sales_db`
+2. ⏳ A API aguarda o banco ficar healthy (healthcheck)
+3. 📦 **Migrations** são executadas (cria todas as tabelas)
+4. 🌱 **Seeds** populam dados iniciais (empresas e usuários de exemplo)
+5. 🚀 **API** fica disponível na porta `3000`
 
 ### Comandos Docker
 
@@ -157,6 +163,15 @@ Resposta esperada:
 ```bash
 npm run docker:down
 ```
+
+### Solução de problemas (Docker)
+
+| Problema | Causa | Solução |
+|----------|-------|---------|
+| `Cannot connect to the Docker daemon` | Docker Engine não está rodando | `sudo systemctl start docker` |
+| `docker compose: not found` | Compose não está instalado | Instale o Docker Engine completo ([guia](https://docs.docker.com/engine/install/)) |
+| `address already in use` na porta 5432 | PostgreSQL local está rodando | `sudo systemctl stop postgresql` ou mude a porta no `docker-compose.yml` |
+| `address already in use` na porta 3000 | Outra aplicação usando a porta | Mude `PORT` no `.env` e no `docker-compose.yml` |
 
 ---
 
@@ -190,7 +205,9 @@ curl http://localhost:3000/health
 # ou acesse no navegador: http://localhost:3000/health
 ```
 
-> **Nota:** O servidor roda na porta definida em `PORT` no `.env`. Se `PORT` não estiver definido, a porta padrão é `3333`.
+> **Nota:** O servidor roda na porta definida em `PORT` no `.env`. Se `PORT` não estiver definido, a porta padrão é `3000`.
+>
+> As **migrations** e **seeds** rodam automaticamente ao iniciar o servidor — o passo 4 é opcional e só necessário se quiser executá-las manualmente antes.
 
 ### Problemas comuns
 
@@ -217,9 +234,9 @@ O projeto inclui documentação interativa completa via **Swagger UI (OpenAPI 3.
    ```
 
    Exemplos:
-   - Se `PORT=3000` → **http://localhost:3000/api-docs**
-   - Se `PORT=3333` → **http://localhost:3333/api-docs**
-   - Se `PORT` não estiver no `.env` → **http://localhost:3333/api-docs**
+   - Se `PORT=3000` (padrão) → **http://localhost:3000/api-docs**
+   - Se `PORT=4000` → **http://localhost:4000/api-docs**
+   - Se `PORT` não estiver no `.env` → **http://localhost:3000/api-docs**
 
 3. **Pronto!** Você verá a interface interativa do Swagger com todos os endpoints documentados.
 
@@ -373,7 +390,7 @@ Todos os scripts podem ser executados com `npm run <script>`:
 | Script          | Comando                  | Descrição                                                            |
 |-----------------|--------------------------|----------------------------------------------------------------------|
 | `dev`           | `ts-node-dev ...`        | Inicia o servidor com hot-reload (reinicia automaticamente ao salvar) |
-| `build`         | `tsc`                    | Compila todo o TypeScript para JavaScript na pasta `dist/`           |
+| `build`         | `tsc && tsc-alias`       | Compila TypeScript para JavaScript e resolve os path aliases na pasta `dist/` |
 
 ### Banco de Dados
 
@@ -386,13 +403,13 @@ Todos os scripts podem ser executados com `npm run <script>`:
 
 ### Docker
 
-| Script           | Comando                      | Descrição                                              |
-|------------------|------------------------------|--------------------------------------------------------|
-| `docker:up`      | `docker-compose up -d`       | Sobe todos os containers em background                 |
-| `docker:down`    | `docker-compose down`        | Para e remove os containers                            |
-| `docker:rebuild` | `docker-compose up -d --build` | Reconstrói as imagens e sobe os containers           |
-| `docker:logs`    | `docker-compose logs -f api` | Mostra os logs da API em tempo real                    |
-| `docker:migrate` | `docker-compose exec api...` | Roda as migrations dentro do container                 |
+| Script           | Comando                        | Descrição                                              |
+|------------------|--------------------------------|--------------------------------------------------------|
+| `docker:up`      | `docker compose up -d`         | Sobe todos os containers em background                 |
+| `docker:down`    | `docker compose down`          | Para e remove os containers                            |
+| `docker:rebuild` | `docker compose up -d --build` | Reconstrói as imagens e sobe os containers             |
+| `docker:logs`    | `docker compose logs -f api`   | Mostra os logs da API em tempo real                    |
+| `docker:migrate` | `docker compose exec api ...`  | Roda as migrations dentro do container                 |
 
 ### Qualidade de Código
 
